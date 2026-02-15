@@ -10,8 +10,9 @@ public class Client
 
     private Client() {}
 
-    public Client(string name, string code)
+    public Client(int id, string name, string code)
     {
+        Id = id;
         Name = name;
         Code = code;
     }

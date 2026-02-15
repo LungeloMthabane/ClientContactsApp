@@ -84,7 +84,19 @@ public class ClientRepository : IClientRepository
     {
         throw new NotImplementedException();
     }
-    
+
+    public async Task<bool> DeleteClientContactAsync(int clientId, int contactId)
+    {
+        var clientContact = await _dbContext.ClientContacts
+            .FirstOrDefaultAsync(cc => cc.ClientId == clientId && cc.ContactId == contactId);
+
+        if (clientContact == null) return false;
+
+        _dbContext.ClientContacts.Remove(clientContact);
+        await _dbContext.SaveChangesAsync();
+        return true;
+    }
+
     /**
      * 
      */

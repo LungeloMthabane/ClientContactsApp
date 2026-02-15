@@ -1,6 +1,5 @@
 using clientContactsApp.Domain.Entities;
 
-
 namespace clientContactsApp.Application.DTOs;
 
 public class ClientDto

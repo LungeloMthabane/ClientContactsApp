@@ -27,15 +27,14 @@ public class ClientController : Controller
         return Ok(clients);
     }
     
-        [HttpDelete("{id}/contacts/{contactId}")]
-        public async Task<IActionResult> DeleteClientContact(int id, int contactId)
-        {
-            var deleted = await _clientRepository.DeleteClientContactAsync(id, contactId);
+    [HttpDelete("{id}/contacts/{contactId}")]
+    public async Task<IActionResult> DeleteClientContact(int id, int contactId)
+    {
+        var deleted = await _clientRepository.DeleteClientContactAsync(id, contactId);
     
-            if (!deleted)
-                return NotFound();
+        if (!deleted)
+            return NotFound();
     
-            return NoContent();
-        }
-    
+        return NoContent();
+    }
 }

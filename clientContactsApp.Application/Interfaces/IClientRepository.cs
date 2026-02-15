@@ -13,5 +13,7 @@ public interface IClientRepository
    
    void UpdateClient(Client client);
    
+   Task<bool> DeleteClientContactAsync(int clientId, int contactId);
+   
    Task SaveChangesAsync();
 }
