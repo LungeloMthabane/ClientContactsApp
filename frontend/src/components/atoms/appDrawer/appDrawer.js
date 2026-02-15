@@ -8,10 +8,10 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
-import {AppRoutes} from "../../routes/appRoutes";
+import {AppRoutes} from "../../../routes/appRoutes";
 import { useNavigate } from 'react-router-dom';
 
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 function AppDrawer() {
     const navigate = useNavigate();

@@ -13,7 +13,7 @@ public class ClientController : Controller
         _clientRepository = clientRepository;
     }
 
-    [HttpGet("getClientById{id}")]
+    [HttpGet("getClientById/{id}")]
     public async Task<IActionResult> GetClientById(int id)
     {
         var clientDetails = await _clientRepository.GetClientById(id);
@@ -26,4 +26,16 @@ public class ClientController : Controller
         var clients = await _clientRepository.GetAllClients();
         return Ok(clients);
     }
+    
+        [HttpDelete("{id}/contacts/{contactId}")]
+        public async Task<IActionResult> DeleteClientContact(int id, int contactId)
+        {
+            var deleted = await _clientRepository.DeleteClientContactAsync(id, contactId);
+    
+            if (!deleted)
+                return NotFound();
+    
+            return NoContent();
+        }
+    
 }
