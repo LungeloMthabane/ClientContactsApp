@@ -64,7 +64,6 @@ public class ClientRepository : IClientRepository
                         cc.Contact.Surname))
                     .ToList()
             ))
-            .OrderBy(c => c.Name)
             .ToListAsync();
     }
     
