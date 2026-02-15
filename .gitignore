@@ -1,0 +1,40 @@
+# JetBrains / Rider
+.idea/
+*.sln.iml
+*.DotSettings.user
+
+# Build
+bin/
+obj/
+out/
+Debug/
+Release/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# Database (SQLite / EF)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ASP.NET
+appsettings.Development.json
+secrets.json
+
+# Node (future frontend)
+node_modules/
+dist/
+build/
+.env

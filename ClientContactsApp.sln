@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clientContactsApp.API", "clientContactsApp.API\clientContactsApp.API.csproj", "{1B274103-868B-451F-9962-A799FAE67AF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clientContactsApp.Application", "clientContactsApp.Application\clientContactsApp.Application.csproj", "{21B7246C-61C8-4451-945D-0E93A3C3317C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clientContactsApp.Contracts", "clientContactsApp.Contracts\clientContactsApp.Contracts.csproj", "{DCFB99BF-9240-4E1F-9E41-2592ABEFAD8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clientContactsApp.Domain", "clientContactsApp.Domain\clientContactsApp.Domain.csproj", "{A9CBAECE-715A-4A76-A4B4-8C6F299C8045}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clientContactsApp.Infrastructure", "clientContactsApp.Infrastructure\clientContactsApp.Infrastructure.csproj", "{1A0300B1-34F6-4B3A-A98F-B3F11AF42C3E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B274103-868B-451F-9962-A799FAE67AF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B274103-868B-451F-9962-A799FAE67AF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B274103-868B-451F-9962-A799FAE67AF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B274103-868B-451F-9962-A799FAE67AF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21B7246C-61C8-4451-945D-0E93A3C3317C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21B7246C-61C8-4451-945D-0E93A3C3317C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21B7246C-61C8-4451-945D-0E93A3C3317C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21B7246C-61C8-4451-945D-0E93A3C3317C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCFB99BF-9240-4E1F-9E41-2592ABEFAD8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCFB99BF-9240-4E1F-9E41-2592ABEFAD8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCFB99BF-9240-4E1F-9E41-2592ABEFAD8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCFB99BF-9240-4E1F-9E41-2592ABEFAD8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9CBAECE-715A-4A76-A4B4-8C6F299C8045}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9CBAECE-715A-4A76-A4B4-8C6F299C8045}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9CBAECE-715A-4A76-A4B4-8C6F299C8045}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9CBAECE-715A-4A76-A4B4-8C6F299C8045}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0300B1-34F6-4B3A-A98F-B3F11AF42C3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0300B1-34F6-4B3A-A98F-B3F11AF42C3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0300B1-34F6-4B3A-A98F-B3F11AF42C3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0300B1-34F6-4B3A-A98F-B3F11AF42C3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
