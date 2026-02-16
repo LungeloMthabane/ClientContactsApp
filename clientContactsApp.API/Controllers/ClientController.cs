@@ -1,6 +1,8 @@
 using clientContactsApp.Application.DTOs;
 using clientContactsApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using clientContactsApp.API.Responses;
+using clientContactsApp.Domain.Entities;
 
 namespace clientContactsApp.API.Controllers;
 
@@ -18,7 +20,11 @@ public class ClientController : Controller
     public async Task<IActionResult> GetClientById(int id)
     {
         var clientDetails = await _clientRepository.GetClientById(id);
-        return Ok(clientDetails);
+
+        if (clientDetails == null)
+            return Ok(ApiResponse<string>.FailureResponse("Client not found"));
+        
+        return Ok(ApiResponse<ClientDto>.SuccessResponse(clientDetails));
     }
 
     [HttpGet("getAllClients")]
@@ -40,9 +46,10 @@ public class ClientController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateContactWithClients([FromBody] CreateClientWithContactsDto dto)
+    public async Task<IActionResult> CreateClientWithContacts([FromBody] CreateClientWithContactsDto dto)
     {
-        var contact = await _clientRepository.CreateClientWithContactsAsync(dto);
-        return Ok(contact);
+        var result = await _clientRepository.CreateClientWithContactsAsync(dto);
+        
+        return !result.Success ? Ok(ApiResponse<string>.FailureResponse(result.Message)) : Ok(ApiResponse<Client>.SuccessResponse(result.Client!, result.Message));
     }
 }

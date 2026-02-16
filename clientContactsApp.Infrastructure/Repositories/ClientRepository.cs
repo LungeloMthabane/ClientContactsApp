@@ -64,10 +64,14 @@ public class ClientRepository : IClientRepository
                         cc.Contact.Email,
                         cc.Contact.Surname))
                     .ToList()
-            ))
-            .ToListAsync();
+            )).ToListAsync();
     }
 
+    /**
+     * Function used to remove clientContact record
+     * @param clientId The client id
+     * @param contactId The contact id
+     */
     public async Task<bool> DeleteClientContactAsync(int clientId, int contactId)
     {
         var clientContact = await _dbContext.ClientContacts
@@ -80,15 +84,24 @@ public class ClientRepository : IClientRepository
         return true;
     }
 
-    public async Task<Client> CreateClientWithContactsAsync(CreateClientWithContactsDto createClientWithContactsDto)
+    /**
+     * Function used to add new client record
+     * @param createClientWithContactsDto
+     */
+    public async Task<(bool Success, string Message, Client? Client)> CreateClientWithContactsAsync(CreateClientWithContactsDto createClientWithContactsDto)
     {
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
+            if (await _dbContext.Clients.AnyAsync(c => c.Name.ToLower() == createClientWithContactsDto.Name.ToLower()))
+            {
+                return (false, $"Client with the name, {createClientWithContactsDto.Name} already exists. Client name must be unique.", null);
+            }
+            
             var nextId = 1;
 
-            if (await _dbContext.Contacts.AnyAsync())
+            if (await _dbContext.Clients.AnyAsync())
             {
                 nextId = await _dbContext.Clients.MaxAsync(c => c.Id) + 1;
             }
@@ -126,7 +139,7 @@ public class ClientRepository : IClientRepository
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return client;
+            return (true, "Client created successfully", client);
         }
         catch
         {

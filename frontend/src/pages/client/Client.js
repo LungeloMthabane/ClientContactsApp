@@ -18,6 +18,7 @@ import Divider from "@mui/material/Divider";
 import Autocomplete from "@mui/material/Autocomplete";
 import CloseIcon from "@mui/icons-material/Close";
 import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
+import ToastComponent from "../../components/atoms/toast/toastComponent";
 
 function Client() {
     const [selectedClient, setSelectedClient] = useState();
@@ -31,6 +32,10 @@ function Client() {
     const [addNewClient, setAddNewClient] = useState(false);
     const [allContacts, setAllContacts] = useState([]);
     const [openNewClientDialog, setOpenNewClientDialog] = useState(false);
+    const [displayErrorAlert, setDisplayErrorAlert] = useState(false);
+    const [apiResponseMessage, setApiResponseMessage] = useState();
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState();
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -51,7 +56,7 @@ function Client() {
             fontWeight: "500",
             fontSize: "24px",
             color: "black",
-            alignItems: "left"
+            alignItems: "left",
         },
         dataTableSection: {
             paddingTop: "2rem",
@@ -83,7 +88,7 @@ function Client() {
             align: "left",
             renderCell: (params) => (
                 params.value.length > 0 ?
-                    <CustomGroupedAvatar groupedItems={params.value} /> : 'No Contact(s) found'
+                    <CustomGroupedAvatar groupedItems={params.value} surnameIncluded /> : 'No Contact(s) found'
             )
         }
     ]
@@ -149,18 +154,17 @@ function Client() {
             await deleteClientContact(selectedClient?.id, row?.id);
 
             setSelectedClient((prev) => {
-                if (!prev) return prev;
-
                 return {
                     ...prev,
-                    contacts: prev.contacts?.filter((x) => x.id !== row.id) || []
+                    contacts: prev?.contacts.filter((x) => x.id !== row.id) || []
                 };
             });
 
+            setShowToast(true);
+            setToastMessage(`${row.name} ${row.surname} has been removed from linked contacts.`)
             setRefreshDataTable(true);
 
         } catch (error) {
-            console.error("Failed to delete contact:", error);
             alert("Failed to delete contact");
         }
     };
@@ -177,6 +181,7 @@ function Client() {
                     icon: <DeleteOutlinedIcon color='error'/>
                 }
             ]}
+            noRowsLabel="No Contact(s) found"
         />
     )
 
@@ -223,24 +228,32 @@ function Client() {
             contactIds: newClientObj.contacts.map((contact) => contact.id),
         }
 
-        try {
-            await createClientsWithContacts(payload).then(() => {
+        await createClientsWithContacts(payload).then((response) => {
+            if (response.success) {
+                setNewClientObj({
+                    name: "",
+                    contacts: []
+                });
                 setRefreshDataTable(true);
                 setOpenNewClientDialog(false);
-            });
-        } catch (error) {
-
-        }
+                setToastMessage(response.message);
+                setShowToast(true)
+            } else {
+                setDisplayErrorAlert(true)
+                setApiResponseMessage(response.message);
+            }
+        });
     }
 
     return (
         <div>
-            <Box sx={styles.headerBox}>
-                <div>
-                    <Typography sx={styles.headerText}>
-                        Clients
-                    </Typography>
-                </div>
+            <Box sx={{ mt: "1rem", ml: "2rem", width: "100%" }}>
+                <Typography
+                    variant="h4"
+                    sx={{ fontWeight: "bold", color: "grey"}}
+                >
+                    Clients
+                </Typography>
             </Box>
             <div style={styles.dataTableSection}>
                 <CustomDataTableComponent
@@ -248,7 +261,9 @@ function Client() {
                     refreshDataTable={refreshDataTable}
                     setRefreshDataTable={setRefreshDataTable}
                     request={getAllClients}
-                    onRowClick={(row) => handleOnRowSelect(row.row)}/>
+                    onRowClick={(row) => handleOnRowSelect(row.row)}
+                    noRowsLabel="No Client(s) found"
+                />
             </div>
 
             <CustomDialogComponent open={openDialog} setOpen={setOpenDialog} dialogTitle={selectedClient?.name} maxWidth="md">
@@ -272,7 +287,9 @@ function Client() {
                 dialogTitle="New Client"
                 maxWidth="md"
                 onSaveClicked={handleCreateClient}
-                enableSaveButton={!(newClientObj.name)}
+                enableSaveButton={!(newClientObj.name && !displayErrorAlert)}
+                showAlert={displayErrorAlert}
+                alertMessage={apiResponseMessage}
             >
                 <Box sx={{ typography: 'body1', m: "2rem" }}>
                     <Stack direction="column" spacing={2}>
@@ -294,6 +311,9 @@ function Client() {
                                 }}
                                 size="small"
                                 onChange={(event) => {
+                                    setApiResponseMessage(undefined);
+                                    setDisplayErrorAlert(false);
+
                                     handleUpdateNewContactObject({
                                         ...newClientObj,
                                         name: event.target.value,
@@ -315,7 +335,7 @@ function Client() {
                                     setAddNewClient(true)
                                 }}
                             >
-                                Add Contact
+                                Add Contact (Optional)
                             </Button>
                         ) : (
                             <div>
@@ -373,6 +393,12 @@ function Client() {
                     />
                 ))}
             </SpeedDial>
+
+            <ToastComponent
+                showToast={showToast}
+                toastMessage={toastMessage}
+                setShowToast={setShowToast}
+            />
         </div>
     )
 }

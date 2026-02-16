@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Autocomplete from '@mui/material/Autocomplete';
 import CloseIcon from "@mui/icons-material/Close";
 import Divider from "@mui/material/Divider";
+import ToastComponent from "../../components/atoms/toast/toastComponent";
 
 function Contact() {
     const [selectedContact, setSelectedContact] = useState();
@@ -33,6 +34,10 @@ function Contact() {
     });
     const [addNewClient, setAddNewClient] = useState(false);
     const [allClients, setClients] = useState([]);
+    const [displayErrorAlert, setDisplayErrorAlert] = useState(false);
+    const [apiResponseMessage, setApiResponseMessage] = useState();
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState();
 
     useEffect(() => {
         getAllClients().then(setClients)
@@ -156,18 +161,17 @@ function Contact() {
             await deleteClientContact(selectedContact?.id, row?.id);
 
             setSelectedContact((prev) => {
-                if (!prev) return prev;
-
                 return {
                     ...prev,
-                    contacts: prev.clients?.filter((x) => x.id !== row.id) || []
+                    clients: prev?.clients.filter((x) => x.id !== row?.id) || []
                 };
             });
 
+            setShowToast(true);
+            setToastMessage(`${row.name} has been removed from linked clients.`)
             setRefreshDataTable(true);
 
         } catch (error) {
-            console.error("Failed to delete client:", error);
             alert("Failed to delete client");
         }
     };
@@ -177,7 +181,9 @@ function Contact() {
             columns={clientDataTableColumns}
             tableData={selectedContact?.clients}
             refreshDataTable={refreshDataTable}
+            setRefreshDataTable={setRefreshDataTable}
             disableRowClick
+            noRowsLabel="No Client(s) found"
             actions={[
                 {
                     action: (row) => {handleDelete(row)},
@@ -231,24 +237,34 @@ function Contact() {
             clientIds: newContact.clients.map((client) => client.id),
         }
 
-        try {
-            await createContactWithClients(payload).then(() => {
+        await createContactWithClients(payload).then((response) => {
+            if (response.success) {
+                setNewContact({
+                    name: "",
+                    surname: "",
+                    email: "",
+                    clients: []
+                })
                 setRefreshDataTable(true);
                 setOpenNewContactDialog(false);
-            });
-        } catch (error) {
-
-        }
+                setToastMessage(response.message);
+                setShowToast(true)
+            } else {
+                setDisplayErrorAlert(true)
+                setApiResponseMessage(response.message);
+            }
+        });
     }
 
     return (
         <div>
-            <Box sx={styles.headerBox}>
-                <div>
-                    <Typography sx={styles.headerText}>
-                        Contacts
-                    </Typography>
-                </div>
+            <Box sx={{ mt: "1rem", ml: "2rem", width: "100%" }}>
+                <Typography
+                    variant="h4"
+                    sx={{ fontWeight: "bold", color: "grey"}}
+                >
+                    Contacts
+                </Typography>
             </Box>
             <div style={styles.dataTableSection}>
                 <CustomDataTableComponent
@@ -256,7 +272,9 @@ function Contact() {
                     refreshDataTable={refreshDataTable}
                     setRefreshDataTable={setRefreshDataTable}
                     request={getAllContacts}
-                    onRowClick={(row) => handleOnRowSelect(row.row)}/>
+                    onRowClick={(row) => handleOnRowSelect(row.row)}
+                    noRowsLabel="No Contact(s) found"
+                />
             </div>
 
             <CustomDialogComponent open={openDialog} setOpen={setOpenDialog} dialogTitle={`${selectedContact?.name} ${selectedContact?.surname}`} maxWidth="md">
@@ -280,7 +298,15 @@ function Contact() {
                 dialogTitle="New Contact"
                 maxWidth="md"
                 onSaveClicked={handleCreateContact}
-                enableSaveButton={!(newContact.name && newContact.surname && newContact.email && newContact.email.includes('@'))}
+                enableSaveButton={!
+                    (newContact.name
+                        && newContact.surname
+                        && newContact.email
+                        && newContact.email.includes('@')
+                        && newContact.email.includes('.')
+                        && !displayErrorAlert)}
+                showAlert={displayErrorAlert}
+                alertMessage={apiResponseMessage}
             >
                 <Box sx={{ typography: 'body1', m: "2rem" }}>
                     <Stack direction="column" spacing={2}>
@@ -357,6 +383,9 @@ function Contact() {
                                 size="small"
                                 name="email"
                                 onChange={(event) => {
+                                    setDisplayErrorAlert(false);
+                                    setApiResponseMessage(undefined);
+
                                     handleUpdateNewContactObject({
                                         ...newContact,
                                         email: event.target.value,
@@ -378,7 +407,7 @@ function Contact() {
                                     setAddNewClient(true)
                                 }}
                             >
-                                Add Client
+                                Add Client (Optional)
                             </Button>
                         ) : (
                             <div>
@@ -434,6 +463,12 @@ function Contact() {
                     />
                 ))}
             </SpeedDial>
+
+            <ToastComponent
+                showToast={showToast}
+                toastMessage={toastMessage}
+                setShowToast={setShowToast}
+            />
         </div>
     )
 }

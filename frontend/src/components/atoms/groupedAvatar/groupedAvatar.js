@@ -4,13 +4,13 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import PropTypes from 'prop-types';
 import { Box } from "@mui/material";
 
-const CustomGroupedAvatar = ({ groupedItems }) => {
+const CustomGroupedAvatar = ({ groupedItems, surnameIncluded }) => {
     return (
        <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
            <AvatarGroup max={1}  total={groupedItems.length}>
                {groupedItems.map((item, index) => (
                    <Avatar key={index} alt={item.name}>
-                       {`${item?.name?.substring(0, 1)}${item?.surname?.substring(0, 1)}`}
+                       {surnameIncluded ? `${item?.name?.substring(0, 1)}${item?.surname?.substring(0, 1)}` : `${item?.name?.substring(0, 1)}`}
                    </Avatar>
                ))}
            </AvatarGroup>
@@ -25,5 +25,6 @@ const CustomGroupedAvatar = ({ groupedItems }) => {
 CustomGroupedAvatar.propTypes = {
     groupedItems: PropTypes.array.isRequired,
 }
+
 
 export default CustomGroupedAvatar;

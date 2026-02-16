@@ -5,7 +5,7 @@ import {
 import PropTypes from 'prop-types';
 import { Box, IconButton, Stack } from "@mui/material";
 
-const CustomDataTableComponent = ({ columns, refreshDataTable, setRefreshDataTable, request, onRowClick, tableData, disableRowClick, actions }) => {
+const CustomDataTableComponent = ({ columns, refreshDataTable, setRefreshDataTable, request, onRowClick, tableData, disableRowClick, actions, noRowsLabel }) => {
     const [data, setData] = useState([]);
 
     useEffect(() => {
@@ -79,6 +79,9 @@ const CustomDataTableComponent = ({ columns, refreshDataTable, setRefreshDataTab
                 loading={refreshDataTable}
                 disableRowSelectionOnClick={disableRowClick}
                 disableMultipleRowSelection
+                localeText={{
+                    noRowsLabel: noRowsLabel
+                }}
             />
         </Box>
     )
@@ -101,6 +104,7 @@ CustomDataTableComponent.propTypes = {
     tableData: PropTypes.array,
     disableRowClick: PropTypes.bool,
     actions: PropTypes.array,
+    noRowsLabel: PropTypes.string
 }
 
 

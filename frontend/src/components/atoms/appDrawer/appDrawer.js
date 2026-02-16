@@ -29,18 +29,20 @@ function AppDrawer() {
                     const Icon = route.icon;
 
                     return (
-                        <ListItem key={index} disablePadding>
-                            <ListItemButton onClick={() => handleMenuItemClick(route)}>
-                                <ListItemIcon>
-                                    <Icon />
-                                </ListItemIcon>
-                                <ListItemText primary={route.label} />
-                            </ListItemButton>
-                        </ListItem>
+                       <>
+                           <ListItem key={index} disablePadding>
+                               <ListItemButton onClick={() => handleMenuItemClick(route)}>
+                                   <ListItemIcon>
+                                       <Icon />
+                                   </ListItemIcon>
+                                   <ListItemText primary={route.label} />
+                               </ListItemButton>
+                           </ListItem>
+                           <Divider />
+                       </>
                     );
                 })}
             </List>
-            <Divider />
         </div>
     );
 

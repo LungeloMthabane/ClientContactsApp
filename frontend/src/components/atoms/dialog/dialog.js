@@ -2,15 +2,14 @@ import React from "react";
 import PropTypes from 'prop-types';
 import {
     Dialog,
-    DialogProps,
     DialogActions,
     Button,
     Divider,
     DialogTitle,
-    Slide,
+    Alert
 } from "@mui/material";
 
-const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClicked, maxWidth, enableSaveButton}) => {
+const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClicked, maxWidth, enableSaveButton, showAlert, alertMessage}) => {
     const defaultWidth = "sm";
 
     return (
@@ -26,6 +25,9 @@ const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClic
                     mx: 2,
                 }}
             />
+            {showAlert && (
+                <Alert severity="error" sx={{mt: "0.5rem", mr: "0.5rem", ml: "0.5rem"}}>{alertMessage}</Alert>
+            )}
             {children}
             <Divider
                 sx={{
@@ -66,6 +68,8 @@ CustomDialogComponent.propTypes = {
     onSaveClicked: PropTypes.func,
     maxWidth: PropTypes.string,
     enableSaveButton: PropTypes.bool,
+    showAlert: PropTypes.bool,
+    alertMessage: PropTypes.string,
 }
 
 export default CustomDialogComponent;

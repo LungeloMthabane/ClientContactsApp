@@ -8,5 +8,5 @@ public interface IClientRepository
    Task<ClientDto?> GetClientById(int id);
    Task<List<ClientDto>> GetAllClients();
    Task<bool> DeleteClientContactAsync(int clientId, int contactId);
-   Task<Client> CreateClientWithContactsAsync(CreateClientWithContactsDto createClientWithContactsDto);
+   Task<(bool Success, string Message, Client? Client)> CreateClientWithContactsAsync(CreateClientWithContactsDto createClientWithContactsDto);
 }

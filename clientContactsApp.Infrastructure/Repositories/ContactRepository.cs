@@ -4,18 +4,22 @@ using clientContactsApp.Domain.Entities;
 using clientContactsApp.Infrastructure.Data;
 using clientContactsApp.Application.Interfaces;
 
-
 namespace clientContactsApp.Infrastructure.Repositories;
 
 public class ContactRepository : IContactRepository
 {
     private readonly AppDbContext _dbContext;
-
+    
     public ContactRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
     
+    /**
+     * Function used to get all contacts
+     *
+     * @returns - list of contacts
+    */
     public async Task<List<ContactDto>> GetAllClients()
     {
         return await _dbContext.Contacts
@@ -35,6 +39,11 @@ public class ContactRepository : IContactRepository
             .ToListAsync();
     }
 
+    /**
+     * Function used to remove clientContact record
+     * @param contactId The contact id
+     * @param clientId The client id
+     */
     public async Task<bool> DeleteClientContactAsync(int contactId, int clientId)
     {
         var clientContact = await _dbContext.ClientContacts
@@ -47,12 +56,22 @@ public class ContactRepository : IContactRepository
         return true;
     }
 
-    public async Task<Contact> CreateContactWithClientAsync(CreateContactWithClientsDto createContactWithClientsDto)
+    /**
+     * Function used to add new contact record
+     * @param createContactWithClientsDto
+     */
+    public async Task<(bool Success, string Message, Contact? Contact)> CreateContactWithClientAsync(CreateContactWithClientsDto createContactWithClientsDto)
     {
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
+            if (await _dbContext.Contacts.AnyAsync(c => c.Email.ToLower() == createContactWithClientsDto.Email.ToLower()))
+            {
+                return (false, $"A Contact with the email address, {createContactWithClientsDto.Email} already exists. Email address must be unique.", null);
+            }
+
+            
             var nextId = 1;
 
             if (await _dbContext.Contacts.AnyAsync())
@@ -63,9 +82,8 @@ public class ContactRepository : IContactRepository
             var contact = new Contact(
                 nextId,
                 createContactWithClientsDto.Name,
-                createContactWithClientsDto.Surname,
-                createContactWithClientsDto.Email
-                );
+                createContactWithClientsDto.Email,
+                createContactWithClientsDto.Surname);
 
             _dbContext.Contacts.Add(contact);
 
@@ -88,7 +106,7 @@ public class ContactRepository : IContactRepository
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return contact;
+            return (true, "Contact created successfully", contact);
         }
         catch
         {

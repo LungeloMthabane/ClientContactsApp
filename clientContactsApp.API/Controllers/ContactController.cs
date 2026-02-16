@@ -1,5 +1,7 @@
+using clientContactsApp.API.Responses;
 using clientContactsApp.Application.DTOs;
 using clientContactsApp.Application.Interfaces;
+using clientContactsApp.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace clientContactsApp.API.Controllers;
@@ -35,7 +37,9 @@ public class ContactController : Controller
     [HttpPost]
     public async Task<IActionResult> CreateContactWithClients([FromBody] CreateContactWithClientsDto dto)
     {
-        var contact = await _contactRepository.CreateContactWithClientAsync(dto);
-        return Ok(contact);
+        var result = await _contactRepository.CreateContactWithClientAsync(dto);
+        
+        return !result.Success ? Ok(ApiResponse<string>.FailureResponse(result.Message)) : Ok(ApiResponse<Contact>.SuccessResponse(result.Contact!, result.Message));
+
     }
 }
