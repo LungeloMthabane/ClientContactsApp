@@ -7,11 +7,11 @@ import AppDrawer from "./components/atoms/appDrawer/appDrawer";
 function App() {
   return (
     <div className="App">
-        <Grid container spacing={1}>
-            <Grid size={1}>
+        <Grid container spacing={2}>
+            <Grid >
                 <AppDrawer />
             </Grid>
-            <Grid size={11}>
+            <Grid size={10}>
                 <Routes>
                     {AppRoutes.map((route, index) => (
                         <Route path={route.path} key={index} element={route.element}/>

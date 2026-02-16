@@ -19,3 +19,17 @@ export async function deleteClientContact(contactId, clientId) {
         throw new Error("Failed to delete client-contact association");
     }
 }
+
+export async function createContactWithClients(data) {
+    const res = await fetch(`${API_URL}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!res.ok) throw new Error("Failed to create contact");
+
+    return await res.json();
+}

@@ -1,3 +1,4 @@
+using clientContactsApp.Application.DTOs;
 using clientContactsApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,5 +30,12 @@ public class ContactController : Controller
             return NotFound();
     
         return NoContent();
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateContactWithClients([FromBody] CreateContactWithClientsDto dto)
+    {
+        var contact = await _contactRepository.CreateContactWithClientAsync(dto);
+        return Ok(contact);
     }
 }

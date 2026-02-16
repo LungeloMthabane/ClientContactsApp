@@ -1,70 +1,200 @@
-# Getting Started with Create React App
+# Client Contacts App — Setup & Run Guide
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project contains a **.NET 8 Web API backend** and a **React (JavaScript) frontend**.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 1. Prerequisites
 
-### `npm start`
+Install the following:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* .NET SDK 8+
+* Node.js 18+
+* npm or yarn
+* (Optional) DataGrip / DB Browser for SQLite
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Verify installations:
 
-### `npm test`
+```bash
+dotnet --version
+node --version
+npm --version
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 2. Clone Repository
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+git clone <repo-url>
+cd clientContactsApp
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 3. Backend Setup (API)
 
-### `npm run eject`
+Navigate to API project:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+cd clientContactsApp.API
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Restore packages:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+dotnet restore
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Build solution:
 
-## Learn More
+```bash
+dotnet build
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 4. Database Setup (SQLite)
 
-### Code Splitting
+Run migrations to create the database:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+dotnet ef database update \
+--project ../clientContactsApp.Infrastructure \
+--startup-project .
+```
 
-### Analyzing the Bundle Size
+This will create:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
+ClientContactsDb.db
+```
 
-### Making a Progressive Web App
+inside the API folder.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+---
 
-### Advanced Configuration
+## 5. Run Backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+dotnet run
+```
 
-### Deployment
+API will start on:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```
+https://localhost:5200 
+```
 
-### `npm run build` fails to minify
+Swagger available at (please confirm on terminal):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+https://localhost:5200/swagger
+```
+
+---
+
+## 6. Frontend Setup (React)
+
+Open a new terminal:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+---
+
+## 7. Configure API URL
+
+In:
+
+```
+src/api/clientApi.js && src/api/contactApi.js
+```
+
+Ensure API URL matches backend:
+
+```js
+const API_URL = "https://localhost:5200/api/clients";
+const API_URL = "https://localhost:5200/api/contacts";
+```
+
+---
+
+## 8. Run Frontend
+
+```bash
+npm start
+```
+
+App will open at:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 9. Common Issues
+
+### HTTPS Certificate Error
+
+Accept the .NET dev certificate:
+
+```bash
+dotnet dev-certs https --trust
+```
+
+---
+
+### Migration Not Found
+
+If migrations fail:
+
+```bash
+dotnet ef migrations add InitialCreate \
+--project ../clientContactsApp.Infrastructure \
+--startup-project .
+dotnet ef database update \
+--project ../clientContactsApp.Infrastructure \
+--startup-project .
+```
+
+---
+
+## 10. Project Structure
+
+```
+clientContactsApp
+ ├── clientContactsApp.API          → Controllers / Startup
+ ├── clientContactsApp.Application  → Interfaces & Services
+ ├── clientContactsApp.Domain       → Entities & Business Rules
+ ├── clientContactsApp.Infrastructure → EF Core & Repositories
+ └── frontend                       → React Frontend
+```
+
+---
+
+## 11. Running Order
+
+1. Start Backend
+
+```bash
+dotnet run
+```
+
+2. Start Frontend
+
+```bash
+npm start
+```
+
+---
+
+You are now ready to use the application

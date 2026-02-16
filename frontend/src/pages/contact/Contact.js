@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { getAllContacts, deleteClientContact } from '../../api/contactApi';
-import { Typography, Box, Stack } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import { getAllContacts, deleteClientContact, createContactWithClients } from '../../api/contactApi';
+import { getAllClients } from '../../api/clientsApi';
+import {Typography, Box, Stack, TextField, Button} from "@mui/material";
 import CustomDataTableComponent from "../../components/atoms/dataTable/dataTable";
 import CustomGroupedAvatar from "../../components/atoms/groupedAvatar/groupedAvatar";
 import CustomDialogComponent from "../../components/atoms/dialog/dialog";
@@ -9,12 +10,34 @@ import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import SpeedDial from "@mui/material/SpeedDial";
+import SpeedDialIcon from "@mui/material/SpeedDialIcon";
+import SpeedDialAction from "@mui/material/SpeedDialAction";
+import NoteAddOutlinedIcon from "@mui/icons-material/NoteAddOutlined";
+import AddIcon from "@mui/icons-material/Add";
+import Autocomplete from '@mui/material/Autocomplete';
+import CloseIcon from "@mui/icons-material/Close";
+import Divider from "@mui/material/Divider";
 
 function Contact() {
     const [selectedContact, setSelectedContact] = useState();
     const [refreshDataTable, setRefreshDataTable] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
-    const [value, setValue] = React.useState('1');
+    const [openNewContactDialog, setOpenNewContactDialog] = useState(false);
+    const [value, setValue] = useState('1');
+    const [newContact, setNewContact] = useState({
+        name: "",
+        surname: "",
+        email: "",
+        clients: []
+    });
+    const [addNewClient, setAddNewClient] = useState(false);
+    const [allClients, setClients] = useState([]);
+
+    useEffect(() => {
+        getAllClients().then(setClients)
+    }, []);
+
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -49,17 +72,17 @@ function Contact() {
         {
             field: "name",
             headerName: "Name",
-            width: 550,
+            width: 300,
         },
         {
             field: "surname",
             headerName: "Surname",
-            width: 550,
+            width: 300,
         },
         {
             field: "email",
             headerName: "Email",
-            width: 550,
+            width: 300,
         },
         {
             field: 'clients',
@@ -164,6 +187,60 @@ function Contact() {
         />
     )
 
+    const actions = [
+        {
+            key: "addContact",
+            icon: <NoteAddOutlinedIcon />,
+            name: "Add Action Point",
+        },
+    ];
+
+    const handleSpeedDialActionButtonClicked = (key) => {
+        switch (key) {
+            case "addContact":
+                setOpenNewContactDialog(true);
+                break;
+        }
+    };
+
+
+    const handleUpdateNewContactObject = (updatedObj) => {
+        setNewContact(updatedObj);
+    };
+
+    const handleOnChange = (event, newValue) => {
+        if (newValue) {
+            const clientDetails = allClients.find((client) => client.name === newValue);
+
+            handleUpdateNewContactObject({
+                ...newContact,
+                clients: [...newContact.clients,  {
+                    id:  clientDetails.id,
+                    name: clientDetails.name,
+                    code: clientDetails.code,
+                }],
+            });
+        }
+    };
+
+    const handleCreateContact = async () => {
+        const payload = {
+            name: newContact.name,
+            surname: newContact.surname,
+            email: newContact.email,
+            clientIds: newContact.clients.map((client) => client.id),
+        }
+
+        try {
+            await createContactWithClients(payload).then(() => {
+                setRefreshDataTable(true);
+                setOpenNewContactDialog(false);
+            });
+        } catch (error) {
+
+        }
+    }
+
     return (
         <div>
             <Box sx={styles.headerBox}>
@@ -196,6 +273,167 @@ function Contact() {
                     </TabContext>
                 </Box>
             </CustomDialogComponent>
+
+            <CustomDialogComponent
+                open={openNewContactDialog}
+                setOpen={setOpenNewContactDialog}
+                dialogTitle="New Contact"
+                maxWidth="md"
+                onSaveClicked={handleCreateContact}
+                enableSaveButton={!(newContact.name && newContact.surname && newContact.email && newContact.email.includes('@'))}
+            >
+                <Box sx={{ typography: 'body1', m: "2rem" }}>
+                    <Stack direction="column" spacing={2}>
+                        <Stack direction="row" spacing={2}>
+                            <div>
+                                <Typography
+                                    sx={{
+                                        fontSize: "12px",
+                                        color: "grey",
+                                    }}
+                                >
+                                    Name:
+                                </Typography>
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    defaultValue=""
+                                    sx={{
+                                        width: "25rem",
+                                    }}
+                                    size="small"
+                                    onChange={(event) => {
+                                        handleUpdateNewContactObject({
+                                            ...newContact,
+                                            name: event.target.value,
+                                        });
+                                    }}
+                                    value={newContact?.name}
+                                />
+                            </div>
+
+                            <div>
+                                <Typography
+                                    sx={{
+                                        fontSize: "12px",
+                                        color: "grey",
+                                    }}
+                                >
+                                    Surname:
+                                </Typography>
+                                <TextField
+                                    required
+                                    id="outlined-required"
+                                    defaultValue=""
+                                    sx={{
+                                        width: "25rem",
+                                    }}
+                                    size="small"
+                                    onChange={(event) => {
+                                        handleUpdateNewContactObject({
+                                            ...newContact,
+                                            surname: event.target.value,
+                                        });
+                                    }}
+                                    value={newContact?.surname}
+                                />
+                            </div>
+                        </Stack>
+
+                        <div>
+                            <Typography
+                                sx={{ fontSize: "12px", color: "grey", marginBottom: "0.5rem" }}
+                            >
+                                Email Address:
+                            </Typography>
+                            <TextField
+                                required
+                                id="outlined-required"
+                                defaultValue=""
+                                sx={{
+                                    width: "25rem",
+                                }}
+                                type="email"
+                                size="small"
+                                name="email"
+                                onChange={(event) => {
+                                    handleUpdateNewContactObject({
+                                        ...newContact,
+                                        email: event.target.value,
+                                    });
+                                }}
+                                value={newContact?.email}
+                            />
+                        </div>
+
+                        {!addNewClient ? (
+                            <Button
+                                variant="text"
+                                sx={{
+                                    justifyContent: "left",
+                                    textTransform: "none",
+                                }}
+                                startIcon={<AddIcon />}
+                                onClick={() => {
+                                    setAddNewClient(true)
+                                }}
+                            >
+                                Add Client
+                            </Button>
+                        ) : (
+                            <div>
+                                <Divider sx={{ mt: 2, mb: 2}}/>
+                                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                                    <Autocomplete
+                                        id="free-solo-demo"
+                                        freeSolo
+                                        onChange={handleOnChange}
+                                        options={allClients.map((option) => option.name)}
+                                        renderInput={(params) => <TextField {...params} label="Client Name" sx={{
+                                            width: "25rem",
+                                        }} size="small"/>}
+                                    />
+                                    <Button
+                                        variant="text"
+                                        startIcon={<CloseIcon />}
+                                        sx={{
+                                            marginTop: "1.5rem",
+                                        }}
+                                        onClick={() => {
+                                            setAddNewClient(false)
+                                        }}
+                                    />
+                                </Stack>
+                            </div>
+                        )}
+
+                        {newContact.clients.length > 0 && (
+                            <Stack direction="column" spacing={2}>
+                                <Typography sx={{ fontSize: "12px", color: "grey" }}> Contact to be linked with: </Typography>
+                                {newContact.clients.map((client, index) => (
+                                    <Typography sx={{ fontSize: "14px"}} key={index}>
+                                        {client.name}
+                                    </Typography>
+                                ))}
+                            </Stack>
+                        )}
+                    </Stack>
+                </Box>
+            </CustomDialogComponent>
+
+            <SpeedDial
+                ariaLabel="SpeedDial basic example"
+                sx={{ position: "absolute", bottom: 16, right: 16 }}
+                icon={<SpeedDialIcon />}
+            >
+                {actions.map((action) => (
+                    <SpeedDialAction
+                        key={action.name}
+                        icon={action.icon}
+                        onClick={() => handleSpeedDialActionButtonClicked(action.key)}
+                    />
+                ))}
+            </SpeedDial>
         </div>
     )
 }

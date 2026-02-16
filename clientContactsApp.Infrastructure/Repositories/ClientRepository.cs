@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using clientContactsApp.Domain.Entities;
 using clientContactsApp.Infrastructure.Data;
 using clientContactsApp.Application.Interfaces;
+using clientContactsApp.Domain.Services;
 
 namespace clientContactsApp.Infrastructure.Repositories;
 
@@ -66,24 +67,6 @@ public class ClientRepository : IClientRepository
             ))
             .ToListAsync();
     }
-    
-    /**
-     * 
-     */
-    public Task AddClient(Client client)
-    {
-        
-        
-        throw new NotImplementedException();
-    }
-    
-    /**
-     * 
-     */
-    public void UpdateClient(Client client)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<bool> DeleteClientContactAsync(int clientId, int contactId)
     {
@@ -97,11 +80,58 @@ public class ClientRepository : IClientRepository
         return true;
     }
 
-    /**
-     * 
-     */
-    public async Task SaveChangesAsync()
+    public async Task<Client> CreateClientWithContactsAsync(CreateClientWithContactsDto createClientWithContactsDto)
     {
-        await  _dbContext.SaveChangesAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            var nextId = 1;
+
+            if (await _dbContext.Contacts.AnyAsync())
+            {
+                nextId = await _dbContext.Clients.MaxAsync(c => c.Id) + 1;
+            }
+            
+            var existingCodes = await _dbContext.Clients
+                .Select(c => c.Code)
+                .ToListAsync();
+
+            var code = ClientCodeGenerator.Generate(createClientWithContactsDto.Name, existingCodes);
+            
+            var client = new Client(
+                nextId,
+                createClientWithContactsDto.Name,
+                code
+            );
+
+            _dbContext.Clients.Add(client);
+
+            if (createClientWithContactsDto.ContactIds.Count > 0 && createClientWithContactsDto.ContactIds.Any())
+            {
+                var contacts = await _dbContext.Contacts
+                    .Where(c => createClientWithContactsDto.ContactIds.Contains(c.Id))
+                    .ToListAsync();
+
+                foreach (var contact in contacts)
+                {
+                    _dbContext.ClientContacts.Add(new ClientContact
+                    {
+                        ClientId = client.Id,
+                        ContactId = contact.Id
+                    });
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return client;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

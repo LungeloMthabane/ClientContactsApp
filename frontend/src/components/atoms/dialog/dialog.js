@@ -10,8 +10,7 @@ import {
     Slide,
 } from "@mui/material";
 
-const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClicked, maxWidth}) => {
-    const [fullWidth, setFullWidth] = React.useState(true);
+const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClicked, maxWidth, enableSaveButton}) => {
     const defaultWidth = "sm";
 
     return (
@@ -33,6 +32,28 @@ const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClic
                     mx: 2,
                 }}
             />
+            <DialogActions>
+                <Button
+                    sx={{
+                        textTransform: "none",
+                    }}
+                    onClick={() => setOpen(false)}
+                >
+                    {"Close"}
+                </Button>
+                {onSaveClicked && (
+                    <Button
+                        variant="contained"
+                        sx={{
+                            textTransform: "none",
+                        }}
+                        disabled={enableSaveButton}
+                        onClick={onSaveClicked}
+                    >
+                        Save
+                    </Button>
+                )}
+            </DialogActions>
         </Dialog>
     )
 }
@@ -44,6 +65,7 @@ CustomDialogComponent.propTypes = {
     dialogTitle: PropTypes.string,
     onSaveClicked: PropTypes.func,
     maxWidth: PropTypes.string,
+    enableSaveButton: PropTypes.bool,
 }
 
 export default CustomDialogComponent;

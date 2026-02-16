@@ -9,7 +9,7 @@ public class Contact
     
     public ICollection<ClientContact> ClientContacts { get; private set; } = new List<ClientContact>();
     
-    private Contact() {}
+    private Contact() { }
 
     public Contact(int id, string name, string email,  string surname)
     {
