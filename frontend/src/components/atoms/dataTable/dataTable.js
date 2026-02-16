@@ -18,7 +18,7 @@ const CustomDataTableComponent = ({ columns, refreshDataTable, setRefreshDataTab
         }
 
         setRefreshDataTable?.(false)
-    }, [request, setRefreshDataTable, data]);
+    }, [request, refreshDataTable, tableData]);
 
     const actionColumn =
         actions && actions.length > 0

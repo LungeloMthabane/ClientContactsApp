@@ -10,7 +10,7 @@ const CustomGroupedAvatar = ({ groupedItems }) => {
            <AvatarGroup max={1}  total={groupedItems.length}>
                {groupedItems.map((item, index) => (
                    <Avatar key={index} alt={item.name}>
-                       {`${item.name.substring(0, 1)}${item.surname.substring(0, 1)}`}
+                       {`${item?.name?.substring(0, 1)}${item?.surname?.substring(0, 1)}`}
                    </Avatar>
                ))}
            </AvatarGroup>
