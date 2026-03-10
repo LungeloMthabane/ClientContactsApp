@@ -9,17 +9,35 @@ import {
     Alert
 } from "@mui/material";
 
-const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClicked, maxWidth, enableSaveButton, showAlert, alertMessage}) => {
+const CustomDialogComponent = (
+    {
+        open,
+        setOpen,
+        children,
+        dialogTitle,
+        onSaveClicked,
+        maxWidth,
+        enableSaveButton,
+        showAlert,
+        alertMessage,
+        customHeader,
+        handleCloseDialog
+    }) => {
     const defaultWidth = "sm";
 
     return (
         <Dialog
             open={open}
             maxWidth={maxWidth || defaultWidth}
-            onClose={() => setOpen(false)}
+            onClose={() => {
+                if (handleCloseDialog) {
+                    handleCloseDialog();
+                }
+                setOpen(false);
+            }}
             fullWidth
         >
-            <DialogTitle>{dialogTitle}</DialogTitle>
+            {dialogTitle ? <DialogTitle>{dialogTitle}</DialogTitle> : customHeader}
             <Divider
                 sx={{
                     mx: 2,
@@ -39,7 +57,12 @@ const CustomDialogComponent = ({open, setOpen, children, dialogTitle, onSaveClic
                     sx={{
                         textTransform: "none",
                     }}
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                        if (handleCloseDialog) {
+                            handleCloseDialog();
+                        }
+                        setOpen(false);
+                    }}
                 >
                     {"Close"}
                 </Button>
@@ -70,6 +93,8 @@ CustomDialogComponent.propTypes = {
     enableSaveButton: PropTypes.bool,
     showAlert: PropTypes.bool,
     alertMessage: PropTypes.string,
+    customHeader: PropTypes.node,
+    handleCloseDialog: PropTypes.func
 }
 
 export default CustomDialogComponent;

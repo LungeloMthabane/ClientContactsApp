@@ -46,9 +46,17 @@ public class ClientController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateClientWithContacts([FromBody] CreateClientWithContactsDto dto)
+    public async Task<IActionResult> CreateClientWithContacts([FromBody] UpsertClientWithContactsDto dto)
     {
         var result = await _clientRepository.CreateClientWithContactsAsync(dto);
+        
+        return !result.Success ? Ok(ApiResponse<string>.FailureResponse(result.Message)) : Ok(ApiResponse<Client>.SuccessResponse(result.Client!, result.Message));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateClient(int id, [FromBody] UpsertClientWithContactsDto dto)
+    {
+        var result = await _clientRepository.UpdateClientAsync(id, dto);
         
         return !result.Success ? Ok(ApiResponse<string>.FailureResponse(result.Message)) : Ok(ApiResponse<Client>.SuccessResponse(result.Client!, result.Message));
     }
