@@ -16,4 +16,9 @@ public class Client
         Name = name;
         Code = code;
     }
+    
+    public void UpdateName(string name)
+    {
+        Name = name;
+    }
 }
