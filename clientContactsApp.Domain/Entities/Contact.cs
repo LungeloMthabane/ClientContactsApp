@@ -18,4 +18,11 @@ public class Contact
         Email = email;
         Surname = surname;
     }
+
+    public void UpdateContactDetails(string name, string surname, string email)
+    {
+        Name = name;
+        Surname = surname;
+        Email = email;
+    }
 }
