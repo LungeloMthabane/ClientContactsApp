@@ -60,15 +60,15 @@ public class ContactRepository : IContactRepository
      * Function used to add new contact record
      * @param createContactWithClientsDto
      */
-    public async Task<(bool Success, string Message, Contact? Contact)> CreateContactWithClientAsync(CreateContactWithClientsDto createContactWithClientsDto)
+    public async Task<(bool Success, string Message, Contact? Contact)> CreateContactWithClientAsync(UpsertContactWithClientsDto upsertContactWithClientsDto)
     {
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
-            if (await _dbContext.Contacts.AnyAsync(c => c.Email.ToLower() == createContactWithClientsDto.Email.ToLower()))
+            if (await _dbContext.Contacts.AnyAsync(c => c.Email.ToLower() == upsertContactWithClientsDto.Email.ToLower()))
             {
-                return (false, $"A Contact with the email address, {createContactWithClientsDto.Email} already exists. Email address must be unique.", null);
+                return (false, $"A Contact with the email address, {upsertContactWithClientsDto.Email} already exists. Email address must be unique.", null);
             }
 
             
@@ -81,16 +81,16 @@ public class ContactRepository : IContactRepository
             
             var contact = new Contact(
                 nextId,
-                createContactWithClientsDto.Name,
-                createContactWithClientsDto.Email,
-                createContactWithClientsDto.Surname);
+                upsertContactWithClientsDto.Name,
+                upsertContactWithClientsDto.Email,
+                upsertContactWithClientsDto.Surname);
 
             _dbContext.Contacts.Add(contact);
 
-            if (createContactWithClientsDto.ClientIds.Count > 0 && createContactWithClientsDto.ClientIds.Any())
+            if (upsertContactWithClientsDto.ClientIds.Count > 0 && upsertContactWithClientsDto.ClientIds.Any())
             {
                 var clients = await _dbContext.Clients
-                    .Where(c => createContactWithClientsDto.ClientIds.Contains(c.Id))
+                    .Where(c => upsertContactWithClientsDto.ClientIds.Contains(c.Id))
                     .ToListAsync();
 
                 foreach (var client in clients)
@@ -107,6 +107,67 @@ public class ContactRepository : IContactRepository
             await transaction.CommitAsync();
 
             return (true, "Contact created successfully", contact);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    /**
+     * 
+     */
+    public async Task<(bool Success, string Message, Contact? Contact)> UpdateContactAsync(int id, UpsertContactWithClientsDto upsertContactWithClientsDto)
+    {
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            var contact = await _dbContext.Contacts
+                .Include(x => x.ClientContacts)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (contact == null)
+            {
+                return (false, "Contact not found", null);
+            }
+            
+            var contactEmailExists = await _dbContext.Contacts.AnyAsync(c => c.Email.ToLower() == upsertContactWithClientsDto.Email.ToLower() 
+                                                                             && c.Id != id);
+
+            if (contactEmailExists)
+            {
+                return (false,
+                    $"A Contact with the email address, {upsertContactWithClientsDto.Email} already exists. Email address must be unique.",
+                    null);
+            }
+            
+            contact.UpdateContactDetails(upsertContactWithClientsDto.Name, upsertContactWithClientsDto.Surname, upsertContactWithClientsDto.Email);
+            
+            var existingClientIds = contact.ClientContacts
+                .Where(x => x.ContactId == contact.Id)
+                .Select(cc => cc.ClientId)
+                .ToList();
+            
+            var clientsToAdd = upsertContactWithClientsDto.ClientIds
+                .Where(id => !existingClientIds.Contains(id))
+                .ToList();
+            
+            foreach (var clientId in clientsToAdd)
+            {
+                contact.ClientContacts.Add(new ClientContact
+                {
+                    ClientId = clientId,
+                    ContactId = contact.Id
+                });
+            }
+            
+            _dbContext.Contacts.Update(contact);
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+            
+            return (true, "Contact updated successfully", contact);
         }
         catch
         {

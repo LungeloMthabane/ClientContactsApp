@@ -33,3 +33,17 @@ export async function createContactWithClients(data) {
 
     return await res.json();
 }
+
+export async function updateContact(id, data) {
+    const res = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+
+    if (!res.ok) throw new Error("Failed to update contact");
+
+    return await res.json();
+}

@@ -7,5 +7,7 @@ public interface IContactRepository
 {
     Task<List<ContactDto>> GetAllClients();
     Task<bool> DeleteClientContactAsync(int contactId, int clientId);
-    Task<(bool Success, string Message, Contact? Contact)> CreateContactWithClientAsync(CreateContactWithClientsDto createContactWithClientsDto);
+    Task<(bool Success, string Message, Contact? Contact)> CreateContactWithClientAsync(UpsertContactWithClientsDto upsertContactWithClientsDto);
+    Task<(bool Success, string Message, Contact? Contact)> UpdateContactAsync(int id, 
+        UpsertContactWithClientsDto upsertContactWithClientsDto);
 }

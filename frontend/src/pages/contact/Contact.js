@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getAllContacts, deleteClientContact, createContactWithClients } from '../../api/contactApi';
+import { getAllContacts, deleteClientContact, createContactWithClients, updateContact } from '../../api/contactApi';
 import { getAllClients } from '../../api/clientsApi';
-import {Typography, Box, Stack, TextField, Button} from "@mui/material";
+import {Typography, Box, Stack, TextField, Button, IconButton} from "@mui/material";
 import CustomDataTableComponent from "../../components/atoms/dataTable/dataTable";
-import CustomGroupedAvatar from "../../components/atoms/groupedAvatar/groupedAvatar";
 import CustomDialogComponent from "../../components/atoms/dialog/dialog";
 import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
@@ -19,6 +18,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CloseIcon from "@mui/icons-material/Close";
 import Divider from "@mui/material/Divider";
 import ToastComponent from "../../components/atoms/toast/toastComponent";
+import CustomChipComponent from "../../components/atoms/chip/chip";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 function Contact() {
     const [selectedContact, setSelectedContact] = useState();
@@ -38,6 +40,7 @@ function Contact() {
     const [apiResponseMessage, setApiResponseMessage] = useState();
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState();
+    const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         getAllClients().then(setClients)
@@ -96,7 +99,7 @@ function Contact() {
             align: "left",
             renderCell: (params) => (
                 params.value.length > 0 ?
-                    <CustomGroupedAvatar groupedItems={params.value} /> : 'No Clients(s) found'
+                    params.value.length : 'No Clients(s) found'
             )
         }
     ]
@@ -119,7 +122,7 @@ function Contact() {
         setOpenDialog(true)
     }
 
-    const renderContactDetails = () => {
+    const renderContactDetails = (editMode) => {
         return (
             <Box
                 sx={{
@@ -128,30 +131,124 @@ function Contact() {
             >
                 <Stack direction="row" sx={{ mt: 2 }} spacing={13}>
                     <Stack direction="column">
-                        <Typography sx={styles.detailsLabel}>
-                            Full Name:
-                        </Typography>
-                        <Typography sx={styles.detailsText}>
-                            {`${selectedContact?.name} ${selectedContact?.surname}`}
-                        </Typography>
+                        {!editMode ? (
+                            <>
+                                <Typography sx={styles.detailsLabel}>
+                                    Full Name:
+                                </Typography>
+                                <Typography sx={styles.detailsText}>
+                                    {`${selectedContact?.name} ${selectedContact?.surname}`}
+                                </Typography>
+                            </>
+                        ) : (
+                            <Stack direction="row" spacing={2}>
+                                <div>
+                                    <Typography
+                                        sx={{
+                                            fontSize: "12px",
+                                            color: "grey",
+                                        }}
+                                    >
+                                        Name:
+                                    </Typography>
+                                    <TextField
+                                        required
+                                        id="outlined-required"
+                                        defaultValue=""
+                                        sx={{
+                                            width: "25rem",
+                                        }}
+                                        size="small"
+                                        onChange={(event) => {
+                                            handleUpdateNewContactObject({
+                                                ...selectedContact,
+                                                name: event.target.value,
+                                            }, editMode);
+                                        }}
+                                        value={selectedContact?.name}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Typography
+                                        sx={{
+                                            fontSize: "12px",
+                                            color: "grey",
+                                        }}
+                                    >
+                                        Surname:
+                                    </Typography>
+                                    <TextField
+                                        required
+                                        id="outlined-required"
+                                        defaultValue=""
+                                        sx={{
+                                            width: "25rem",
+                                        }}
+                                        size="small"
+                                        onChange={(event) => {
+                                            handleUpdateNewContactObject({
+                                                ...selectedContact,
+                                                surname: event.target.value,
+                                            }, editMode);
+                                        }}
+                                        value={selectedContact?.surname}
+                                    />
+                                </div>
+                            </Stack>
+                        )}
                     </Stack>
-                    <Stack direction="column">
-                        <Typography sx={styles.detailsLabel}>
+                    {!editMode && (
+                        <>
+                            <Stack direction="column">
+                                <Typography sx={styles.detailsLabel}>
+                                    Email Address:
+                                </Typography>
+                                <Typography sx={styles.detailsText}>
+                                    {selectedContact?.email}
+                                </Typography>
+                            </Stack>
+                            <Stack direction="column">
+                                <Typography sx={styles.detailsLabel}>
+                                    No.of Linked Clients:
+                                </Typography>
+                                <Typography sx={styles.detailsText}>
+                                    {selectedContact?.clients.length >  0 ? selectedContact?.clients.length : "No Client(s) found"}
+                                </Typography>
+                            </Stack>
+                        </>
+                    )}
+                </Stack>
+                {editMode && (
+                    <div>
+                        <Typography
+                            sx={{ fontSize: "12px", color: "grey", marginBottom: "0.5rem" }}
+                        >
                             Email Address:
                         </Typography>
-                        <Typography sx={styles.detailsText}>
-                            {selectedContact?.email}
-                        </Typography>
-                    </Stack>
-                    <Stack direction="column">
-                        <Typography sx={styles.detailsLabel}>
-                            No.of Linked Clients:
-                        </Typography>
-                        <Typography sx={styles.detailsText}>
-                            {selectedContact?.clients.length >  0 ? selectedContact?.clients.length : "No Client(s) found"}
-                        </Typography>
-                    </Stack>
-                </Stack>
+                        <TextField
+                            required
+                            id="outlined-required"
+                            defaultValue=""
+                            sx={{
+                                width: "25rem",
+                            }}
+                            type="email"
+                            size="small"
+                            name="email"
+                            onChange={(event) => {
+                                setDisplayErrorAlert(false);
+                                setApiResponseMessage(undefined);
+
+                                handleUpdateNewContactObject({
+                                    ...selectedContact,
+                                    email: event.target.value,
+                                }, editMode);
+                            }}
+                            value={selectedContact?.email}
+                        />
+                    </div>
+                )}
             </Box>
         )
     }
@@ -210,51 +307,171 @@ function Contact() {
     };
 
 
-    const handleUpdateNewContactObject = (updatedObj) => {
-        setNewContact(updatedObj);
+    const handleUpdateNewContactObject = (updatedObj, existingContact) => {
+        !existingContact ? setNewContact(updatedObj) : setSelectedContact(updatedObj);
     };
 
-    const handleOnChange = (event, newValue) => {
-        if (newValue) {
-            const clientDetails = allClients.find((client) => client.name === newValue);
+    const handleOnChange = (selectedClient, existingContact) => {
+        if (selectedClient) {
+            const clientDetails = allClients.find((client) => client === selectedClient);
 
             handleUpdateNewContactObject({
-                ...newContact,
-                clients: [...newContact.clients,  {
+                ...(!existingContact ? newContact : selectedContact),
+                clients: [...(!existingContact ? newContact : selectedContact).clients,  {
                     id:  clientDetails.id,
                     name: clientDetails.name,
                     code: clientDetails.code,
+                    newClientLink: true
                 }],
-            });
+            }, existingContact);
         }
     };
 
-    const handleCreateContact = async () => {
+    const handleRemoveUnsavedClientLink = (client, existingContact) => {
+        const updatedClientList = (!existingContact ? newContact : selectedContact).clients.filter(item => item !== client);
+
+        handleUpdateNewContactObject({
+            ...(!existingContact ? newContact : selectedContact),
+            clients: [...updatedClientList],
+        }, existingContact);
+    }
+
+    const handleUpsertContact = async (existingContact) => {
         const payload = {
-            name: newContact.name,
-            surname: newContact.surname,
-            email: newContact.email,
-            clientIds: newContact.clients.map((client) => client.id),
+            name: (!existingContact ? newContact : selectedContact).name,
+            surname: (!existingContact ? newContact : selectedContact).surname,
+            email: (!existingContact ? newContact : selectedContact).email,
+            clientIds: (!existingContact ? newContact : selectedContact).clients.map((client) => client.id),
         }
 
-        await createContactWithClients(payload).then((response) => {
-            if (response.success) {
-                setNewContact({
-                    name: "",
-                    surname: "",
-                    email: "",
-                    clients: []
-                })
-                setRefreshDataTable(true);
-                setOpenNewContactDialog(false);
-                setToastMessage(response.message);
-                setShowToast(true)
-            } else {
-                setDisplayErrorAlert(true)
-                setApiResponseMessage(response.message);
-            }
-        });
+        if (!existingContact) {
+            await createContactWithClients(payload).then((response) => {
+                if (response.success) {
+                    setNewContact({
+                        name: "",
+                        surname: "",
+                        email: "",
+                        clients: []
+                    })
+                    setRefreshDataTable(true);
+                    setOpenNewContactDialog(false);
+                    setToastMessage(response.message);
+                    setShowToast(true)
+                } else {
+                    setDisplayErrorAlert(true)
+                    setApiResponseMessage(response.message);
+                }
+            });
+        } else {
+            await updateContact(selectedContact?.id, payload).then((response) => {
+                if (response.success) {
+                    handleResetContactObjects();
+                    setRefreshDataTable(true);
+                    setOpenDialog(false);
+                    setToastMessage(response.message);
+                    setShowToast(true)
+                } else {
+                    setDisplayErrorAlert(true)
+                    setApiResponseMessage(response.message);
+                }
+            })
+        }
+
     }
+
+    const handleRenderClientEditSection = (existingContact) => {
+        return (
+            <div style={ existingContact ? {margin: "1rem"} : {}}>
+                <Divider sx={{mt: 2, mb: 2}}/>
+                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                    <Autocomplete
+                        id="free-solo-demo"
+                        freeSolo
+                        onChange={(_event, value) =>
+                            handleOnChange(value, existingContact)}
+                        options={allClients}
+                        getOptionLabel={(option) => {
+                            return `${option.name}`
+                        }}
+                        getOptionDisabled={(option) => {
+                            return !existingContact ? newContact?.clients.some((item) => item.name === option.name)
+                                : selectedContact?.clients.some((item) => item.name === option.name)
+                        }}
+                        renderOption={(props, option) => {
+                            const {key, ...optionProps} = props;
+                            return (
+                                <Box component="li" key={key} {...optionProps}>
+                                    <div style={{
+                                        fontWeight: 'bold',
+                                    }}>{option.name}</div>
+                                </Box>
+                            )
+                        }}
+                        renderInput={(params) =>
+                            <TextField {...params} label="Client Name" sx={{
+                                width: "25rem",
+                            }} size="small"
+                                slotProps={{
+                                   htmlInput: {
+                                       ...params.inputProps,
+                                  },
+                                }}/>
+                        }
+                    />
+                    {!existingContact && (
+                        <Button
+                            variant="text"
+                            startIcon={<CloseIcon />}
+                            onClick={() => {
+                                setAddNewClient(false)
+                            }}
+                        />
+                    )}
+                </Stack>
+
+                {(!existingContact ? newContact : selectedContact)?.clients.length > 0 && (
+                    <Stack direction="column" spacing={2} sx={{mt: 3}}>
+                        <Typography sx={{ fontSize: "12px", color: "grey" }}> Contact to be linked with: </Typography>
+                        {(!existingContact ? newContact : selectedContact).clients.map((client, index) => (
+                            <div key={index}>
+                                <Stack direction="row" sx={{justifyContent: "space-between"}}>
+                                    <Typography sx={{ fontSize: "14px", fontWeight: "bold"}} key={index}>
+                                        {client.name}
+                                    </Typography>
+                                    {client.newClientLink && (
+                                        <Button
+                                            variant="text"
+                                            startIcon={<CloseIcon/>}
+                                            onClick={() => {
+                                                handleRemoveUnsavedClientLink(client, existingContact)
+                                            }}
+                                        />
+                                    )}
+                                </Stack>
+                                {index !== (!existingContact ? newContact : selectedContact)?.clients.length - 1 && (
+                                    <Divider/>
+                                )}
+                            </div>
+                        ))}
+                    </Stack>
+                )}
+            </div>
+        )
+    }
+
+    const handleResetContactObjects = () => {
+        setSelectedContact(undefined);
+        setNewContact({
+            name: "",
+            surname: "",
+            email: "",
+            clients: []
+        });
+        setAddNewClient(false);
+        setEditMode(false);
+        setValue('1')
+    }
+
 
     return (
         <div>
@@ -277,19 +494,76 @@ function Contact() {
                 />
             </div>
 
-            <CustomDialogComponent open={openDialog} setOpen={setOpenDialog} dialogTitle={`${selectedContact?.name} ${selectedContact?.surname}`} maxWidth="md">
+            <CustomDialogComponent
+                open={openDialog}
+                setOpen={setOpenDialog}
+                handleCloseDialog={handleResetContactObjects}
+                maxWidth="md"
+                onSaveClicked={editMode ? () => handleUpsertContact(true) : undefined}
+                enableSaveButton={!
+                    (selectedContact?.name
+                        && selectedContact?.surname
+                        && selectedContact?.email
+                        && selectedContact?.email.includes('@')
+                        && selectedContact?.email.includes('.')
+                        && !displayErrorAlert
+                        && editMode)}
+                showAlert={displayErrorAlert}
+                alertMessage={apiResponseMessage}
+                customHeader={
+                    <Box sx={{
+                        m: 2,
+                    }}>
+                        <Stack direction="row" sx={{justifyContent: "space-between"}}>
+                            <Typography
+                                sx={{fontWeight: "bold", fontSize: "22px"}}
+                            >{`${selectedContact?.name} ${selectedContact?.surname}`}</Typography>
+                            <Stack direction="row" spacing={1}>
+                                <CustomChipComponent
+                                    label={editMode ? "Edit" : "View"}
+                                    color={editMode ? "primary" : "default"}
+                                    variant={editMode ? "outlined" : "filled"}
+                                />
+                                {!editMode && (
+                                    <IconButton onClick={() => {
+                                        setEditMode(true)
+                                    }} size="small">
+                                        <EditIcon fontSize="small"/>
+                                    </IconButton>
+                                )}
+
+                                {editMode && (
+                                    <IconButton onClick={() => {
+                                        setEditMode(false)
+                                    }} size="small">
+                                        <VisibilityOutlinedIcon fontSize="small"/>
+                                    </IconButton>
+                                )}
+                            </Stack>
+                        </Stack>
+                    </Box>}
+            >
                 <Box sx={{ width: '100%', typography: 'body1' }}>
-                    <TabContext value={value}>
-                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <TabList onChange={handleChange} aria-label="lab API tabs example">
-                                <Tab label="Client Details" value="1" sx={{ textTransform: 'none' }}/>
-                                <Tab label={`Contacts (${selectedContact?.clients.length})`} value="2" sx={{ textTransform: 'none' }}/>
-                            </TabList>
-                        </Box>
-                        <TabPanel value="1">{renderContactDetails()}</TabPanel>
-                        <TabPanel value="2">{renderClientTable()}</TabPanel>
-                    </TabContext>
+                    {!editMode && (
+                        <TabContext value={value}>
+                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                <TabList onChange={handleChange} aria-label="lab API tabs example">
+                                    <Tab label="Contact Details" value="1" sx={{ textTransform: 'none' }}/>
+                                    <Tab label={`Clients (${selectedContact?.clients.length})`} value="2" sx={{ textTransform: 'none' }}/>
+                                </TabList>
+                            </Box>
+                            <TabPanel value="1">{renderContactDetails(false)}</TabPanel>
+                            <TabPanel value="2">{renderClientTable()}</TabPanel>
+                        </TabContext>
+                    )}
                 </Box>
+
+                {editMode && (
+                    <>
+                        {renderContactDetails(true)}
+                        {handleRenderClientEditSection(true)}
+                    </>
+                )}
             </CustomDialogComponent>
 
             <CustomDialogComponent
@@ -297,7 +571,7 @@ function Contact() {
                 setOpen={setOpenNewContactDialog}
                 dialogTitle="New Contact"
                 maxWidth="md"
-                onSaveClicked={handleCreateContact}
+                onSaveClicked={() => handleUpsertContact(false)}
                 enableSaveButton={!
                     (newContact.name
                         && newContact.surname
@@ -307,6 +581,7 @@ function Contact() {
                         && !displayErrorAlert)}
                 showAlert={displayErrorAlert}
                 alertMessage={apiResponseMessage}
+                handleCloseDialog={handleResetContactObjects}
             >
                 <Box sx={{ typography: 'body1', m: "2rem" }}>
                     <Stack direction="column" spacing={2}>
@@ -411,40 +686,8 @@ function Contact() {
                             </Button>
                         ) : (
                             <div>
-                                <Divider sx={{ mt: 2, mb: 2}}/>
-                                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-                                    <Autocomplete
-                                        id="free-solo-demo"
-                                        freeSolo
-                                        onChange={handleOnChange}
-                                        options={allClients.map((option) => option.name)}
-                                        renderInput={(params) => <TextField {...params} label="Client Name" sx={{
-                                            width: "25rem",
-                                        }} size="small"/>}
-                                    />
-                                    <Button
-                                        variant="text"
-                                        startIcon={<CloseIcon />}
-                                        sx={{
-                                            marginTop: "1.5rem",
-                                        }}
-                                        onClick={() => {
-                                            setAddNewClient(false)
-                                        }}
-                                    />
-                                </Stack>
+                                {handleRenderClientEditSection(false)}
                             </div>
-                        )}
-
-                        {newContact.clients.length > 0 && (
-                            <Stack direction="column" spacing={2}>
-                                <Typography sx={{ fontSize: "12px", color: "grey" }}> Contact to be linked with: </Typography>
-                                {newContact.clients.map((client, index) => (
-                                    <Typography sx={{ fontSize: "14px"}} key={index}>
-                                        {client.name}
-                                    </Typography>
-                                ))}
-                            </Stack>
                         )}
                     </Stack>
                 </Box>

@@ -167,7 +167,8 @@ public class ClientRepository : IClientRepository
                 return (false, "Client not found", null);
             }
             
-            var clientNameExists = await _dbContext.Clients.AnyAsync(c => c.Name.ToLower() == upsertClientWithContactsDto.Name.ToLower() && c.Id != id);
+            var clientNameExists = await _dbContext.Clients.AnyAsync(c => c.Name.ToLower() == upsertClientWithContactsDto.Name.ToLower() 
+                                                                          && c.Id != id);
 
             if (clientNameExists)
             {

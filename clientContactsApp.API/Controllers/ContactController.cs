@@ -35,11 +35,19 @@ public class ContactController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateContactWithClients([FromBody] CreateContactWithClientsDto dto)
+    public async Task<IActionResult> CreateContactWithClients([FromBody] UpsertContactWithClientsDto dto)
     {
         var result = await _contactRepository.CreateContactWithClientAsync(dto);
         
         return !result.Success ? Ok(ApiResponse<string>.FailureResponse(result.Message)) : Ok(ApiResponse<Contact>.SuccessResponse(result.Contact!, result.Message));
 
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateContact(int id, [FromBody] UpsertContactWithClientsDto dto)
+    {
+        var result = await _contactRepository.UpdateContactAsync(id, dto);
+        
+        return !result.Success ? Ok(ApiResponse<string>.FailureResponse(result.Message)) : Ok(ApiResponse<Contact>.SuccessResponse(result.Contact!, result.Message));
     }
 }
